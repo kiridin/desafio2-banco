@@ -1,0 +1,28 @@
+# ----------------------- Categorias -----------------------
+
+### GET - Listar todas as categorias
+GET http://localhost:8081/api/categories
+
+### GET - Consultar uma categoria por ID
+GET http://localhost:8081/api/categories/1
+
+### POST - Adicionar uma categoria
+POST http://localhost:8081/api/categories
+Content-Type: application/json
+
+{
+    "name": "Categoria Teste",
+    "description": "Descrição da Categoria Teste"
+}
+
+### PUT - Atualizar uma categoria
+PUT http://localhost:8081/api/categories/1
+Content-Type: application/json
+
+{
+    "name": "Categoria Atualizada",
+    "description": "Descrição Atualizada"
+}
+
+### DELETE - Excluir uma categoria
+DELETE http://localhost:8081/api/categories/1

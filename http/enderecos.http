@@ -1,0 +1,39 @@
+# ----------------------- Endereços -----------------------
+
+### GET - Listar todos os endereços
+GET http://localhost:8081/api/addresses
+
+### GET - Consultar um endereço por ID
+GET http://localhost:8081/api/addresses/1
+
+### POST - Adicionar um endereço associado a um cliente
+POST http://localhost:8081/api/addresses?customerId=12
+Content-Type: application/json
+
+{
+    "cep": "12345-678",
+    "rua": "Rua Teste",
+    "numero": "100",
+    "bairro": "Bairro Teste",
+    "complemento": "Apto 101",
+    "cidade": "Cidade Teste",
+    "estado": "Estado Teste"
+}
+
+### PUT - Atualizar um endereço
+PUT http://localhost:8081/api/addresses/2
+Content-Type: application/json
+
+{
+    "cep": "98765-432",
+    "rua": "Rua AtualizadaV",
+    "numero": "200",
+    "bairro": "Bairro Atualizado",
+    "complemento": "Casa 202",
+    "cidade": "Cidade Atualizada",
+    "estado": "Estado Atualizado",
+    "customerId": 1  
+}
+
+### DELETE - Excluir um endereço
+DELETE http://localhost:8081/api/addresses/1

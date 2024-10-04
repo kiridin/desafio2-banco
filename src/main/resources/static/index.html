@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema CRUD E-Commerce</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>
+ body {
+    background-image: url('background.svg'); /* Certifique-se de que o caminho está correto */
+    background-size: cover; /* Faz com que a imagem cubra toda a área de fundo */
+    background-position: center; /* Centraliza a imagem */
+    background-repeat: no-repeat; /* Impede que a imagem se repita */
+    padding-top: 70px;
+
+}
+.modal {
+z-index: 1; /* Z-index maior que a div de desfoque */
+padding-top: 40px;
+}
+.modal-dialog{} 
+.modal-backdrop {
+    display: none; /* Esconde o backdrop se ainda estiver presente */
+}
+.addAddressModal{
+}
+        /* Estilo da barra de navegação */
+        .navbar {
+            background-color: #343a40;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            top: 0;
+            display: block; /* Esconde o backdrop se ainda estiver presente */
+
+        }
+
+        .navbar a {
+            color: white !important;
+            margin-right: 20px;
+            display: block; /* Esconde o backdrop se ainda estiver presente */
+
+        }
+        .fade-in{
+            animation: fadeIn 5s forwards;
+
+
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #343a40;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra suave */
+            opacity: 0; /* Começa invisível */
+            animation: fadeIn 1s forwards; /* Animação de fade-in com duração de 2s */
+        }
+
+        /* Animação de fade-in */
+        @keyframes fadeIn {
+            from {
+                opacity: 0; /* Começa invisível */
+            }
+            to {
+                opacity: 1; /* Fica totalmente visível */
+            }
+        }
+
+</style>
+<body class="bg-light">
+    <div id="blur-background" class="blur-background"></div> <!-- Div para o efeito de desfoque -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">E-Commerce</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#produtos">Produtos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#categorias">Categorias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#clientes">Clientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#enderecos">Endereços</a>
+                    </li>
+                </ul>
+                
+            </div>
+        </div>
+    </nav>
+
+    <div class="fade-in">
+    <div class="container my-4">
+        <h1 class="text-center mb-4">Sistema CRUD E-Commerce</h1>
+
+        <!-- Produtos -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 id="produtos" class="card-title">Produtos</h2>
+                <button class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#produtoModal">Adicionar
+                    Produto</button>
+                <div id="produtos-lista"></div>
+
+                <!-- Modal para Adicionar/Editar Produto -->
+                <div class="modal fade" id="produtoModal" tabindex="-1" aria-labelledby="produtoModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="produtoModalLabel">Adicionar/Editar Produto</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="produto-id">
+                                <div class="mb-3">
+                                    <label for="produto-nome" class="form-label">Nome do Produto:</label>
+                                    <input type="text" class="form-control" id="produto-nome" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="produto-descricao" class="form-label">Descrição:</label>
+                                    <input type="text" class="form-control" id="produto-descricao" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="produto-preco" class="form-label">Preço:</label>
+                                    <input type="number" class="form-control" id="produto-preco" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="produto-categoria" class="form-label">Categoria:</label>
+                                    <select id="produto-categoria" class="form-control"></select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-success"
+                                    onclick="adicionarOuAtualizarProduto()">Salvar Produto</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categorias -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 id="categorias" class="card-title">Categorias</h2>
+                <button class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#categoriaModal">Adicionar
+                    Categoria</button>
+                <div id="categorias-lista"></div>
+
+                <!-- Modal para Adicionar/Editar Categoria -->
+                <div class="modal fade" id="categoriaModal" tabindex="-1" aria-labelledby="categoriaModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="categoriaModalLabel">Adicionar/Editar Categoria</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="categoria-id">
+                                <div class="mb-3">
+                                    <label for="categoria-nome" class="form-label">Nome da Categoria:</label>
+                                    <input type="text" class="form-control" id="categoria-nome" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="categoria-descricao" class="form-label">Descrição:</label>
+                                    <input type="text" class="form-control" id="categoria-descricao" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-success"
+                                    onclick="adicionarOuAtualizarCategoria()">Salvar Categoria</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clientes -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 id="clientes" class="card-title">Clientes</h2>
+                <button class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#clienteModal">Adicionar
+                    Cliente</button>
+                <div id="clientes-lista"></div>
+
+                <!-- Modal para Adicionar/Editar Cliente -->
+                <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="clienteModalLabel">Adicionar/Editar Cliente</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="cliente-id">
+                                <div class="mb-3">
+                                    <label for="cliente-nome" class="form-label">Nome do Cliente:</label>
+                                    <input type="text" class="form-control" id="cliente-nome" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cliente-cpf" class="form-label">CPF:</label>
+                                    <input type="text" class="form-control" id="cliente-cpf" required>
+                                </div>
+
+                                <!-- Botões para Endereço Existente ou Novo -->
+                                <h5>Endereços</h5>
+                                <button class="btn btn-primary mb-2" onclick="escolherEnderecoExistente()">Endereço
+                                    Existente</button>
+                                <button class="btn btn-success mb-2" onclick="adicionarNovoEndereco()">Novo
+                                    Endereço</button>
+
+                                <!-- Tabela de Endereços Existentes -->
+                                <div id="endereco-existente" style="display:none;">
+                                    <h6>Selecione um Endereço:</h6>
+                                    <div id="enderecos-lista"></div>
+                                </div>
+
+                                <!-- Formulário para Novo Endereço -->
+                                <div id="novo-endereco" style="display:none;">
+                                    <h6>Adicionar Novo Endereço:</h6>
+                                    <div class="mb-3">
+                                        <label for="endereco-cep" class="form-label">CEP:</label>
+                                        <input type="text" class="form-control" id="endereco-cep" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="endereco-rua" class="form-label">Rua:</label>
+                                        <input type="text" class="form-control" id="endereco-rua" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="endereco-numero" class="form-label">Número:</label>
+                                        <input type="text" class="form-control" id="endereco-numero" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="endereco-bairro" class="form-label">Bairro:</label>
+                                        <input type="text" class="form-control" id="endereco-bairro" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="endereco-complemento" class="form-label">Complemento:</label>
+                                        <input type="text" class="form-control" id="endereco-complemento">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="endereco-cidade" class="form-label">Cidade:</label>
+                                        <input type="text" class="form-control" id="endereco-cidade" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="endereco-estado" class="form-label">Estado:</label>
+                                        <input type="text" class="form-control" id="endereco-estado" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-success"
+                                    onclick="adicionarOuAtualizarClienteComEndereco()">Salvar Cliente</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endereços -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 id="enderecos"  class="card-title">Endereços</h2>
+                <div id="enderecos-lista-principal"></div>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Scripts para as Funções CRUD -->
+    <script>
+
+        const baseURL = 'http://localhost:8081/api';
+        let categoriasMap = {}; // Um objeto para armazenar as categorias com seus IDs
+
+        // Função para carregar categorias e armazená-las em um mapa para fácil acesso
+        function carregarCategorias() {
+            return axios.get(`${baseURL}/categories`)
+                .then(response => {
+                    const categorias = response.data;
+                    categorias.forEach(categoria => {
+                        categoriasMap[categoria.id] = categoria.name; // Armazena as categorias em um objeto com base no ID
+                    });
+                })
+                .catch(error => console.error('Erro ao carregar categorias:', error));
+        }
+
+        // Função para listar produtos e exibir a categoria correspondente
+        function listarProdutos() {
+            axios.get(`${baseURL}/products`)
+                .then(response => {
+                    const produtos = response.data;
+                    let html = '<table class="table table-striped">';
+                    html += '<thead><tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Preço</th><th>Categoria</th><th>Ações</th></tr></thead><tbody>';
+                    produtos.forEach(produto => {
+                        const categoriaNome = produto.category ? categoriasMap[produto.category.id] : 'Sem categoria'; // Busca o nome da categoria no mapa
+                        html += `<tr>
+                        <td>${produto.id}</td>
+                        <td>${produto.name}</td>
+                        <td>${produto.description}</td>
+                        <td>${produto.price}</td>
+                        <td>${categoriaNome}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editarProduto(${produto.id})">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletarProduto(${produto.id})">Excluir</button>
+                        </td>
+                    </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    document.getElementById('produtos-lista').innerHTML = html;
+                })
+                .catch(error => console.error('Erro ao listar produtos:', error));
+        }
+
+        // Função para carregar categorias no campo de seleção ao adicionar ou editar um produto
+        function carregarCategoriasNoProduto() {
+            axios.get(`${baseURL}/categories`)
+                .then(response => {
+                    const categorias = response.data;
+                    let select = document.getElementById('produto-categoria');
+                    select.innerHTML = ''; // Limpa o select
+                    categorias.forEach(categoria => {
+                        const option = document.createElement('option');
+                        option.value = categoria.id; // Usa o ID da categoria para a requisição POST ou PUT
+                        option.textContent = categoria.name; // Mostra o nome da categoria
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Erro ao carregar categorias:', error));
+        }
+
+        // Função para adicionar ou atualizar um produto
+        function adicionarOuAtualizarProduto() {
+            const id = document.getElementById('produto-id').value;
+            const nome = document.getElementById('produto-nome').value;
+            const descricao = document.getElementById('produto-descricao').value;
+            const preco = document.getElementById('produto-preco').value;
+            const categoriaId = document.getElementById('produto-categoria').value; // Pega o ID da categoria selecionada
+
+            const produto = {
+                name: nome,
+                description: descricao,
+                price: preco,
+                category: { id: categoriaId } // Usa o ID da categoria para a requisição
+            };
+
+            if (id) {
+                // Atualizar produto
+                axios.put(`${baseURL}/products/${id}`, produto)
+                    .then(() => {
+                        alert('Produto atualizado com sucesso!');
+                        listarProdutos();
+                        bootstrap.Modal.getInstance(document.getElementById('produtoModal')).hide();
+                    })
+                    .catch(error => console.error('Erro ao atualizar produto:', error));
+            } else {
+                // Adicionar novo produto
+                axios.post(`${baseURL}/products`, produto)
+                    .then(() => {
+                        alert('Produto adicionado com sucesso!');
+                        listarProdutos();
+                        bootstrap.Modal.getInstance(document.getElementById('produtoModal')).hide();
+                    })
+                    .catch(error => console.error('Erro ao adicionar produto:', error));
+            }
+        }
+
+        // Função para editar um produto
+        function editarProduto(id) {
+            axios.get(`${baseURL}/products/${id}`)
+                .then(response => {
+                    const produto = response.data;
+                    document.getElementById('produto-id').value = produto.id;
+                    document.getElementById('produto-nome').value = produto.name;
+                    document.getElementById('produto-descricao').value = produto.description;
+                    document.getElementById('produto-preco').value = produto.price;
+
+                    // Atualiza o campo de categoria, caso o produto tenha uma
+                    if (produto.category) {
+                        document.getElementById('produto-categoria').value = produto.category.id; // Seleciona o ID da categoria
+                    } else {
+                        document.getElementById('produto-categoria').value = ''; // Deixa o select vazio caso não tenha categoria
+                    }
+
+                    const modal = new bootstrap.Modal(document.getElementById('produtoModal'));
+                    modal.show();
+                })
+                .catch(error => console.error('Erro ao carregar produto para edição:', error));
+        }
+
+        // Função para deletar um produto
+        function deletarProduto(id) {
+            if (confirm('Deseja realmente excluir este produto?')) {
+                axios.delete(`${baseURL}/products/${id}`)
+                    .then(() => {
+                        alert('Produto excluído com sucesso!');
+                        listarProdutos();
+                    })
+                    .catch(error => console.error('Erro ao excluir produto:', error));
+            }
+        }
+
+        // Inicializa as funções quando a página carrega
+        window.onload = function () {
+            carregarCategorias().then(() => listarProdutos()); // Primeiro carrega as categorias e depois lista os produtos
+            carregarCategoriasNoProduto(); // Carregar categorias na seleção ao carregar a página
+        };
+        // Funções para Categorias
+        function listarCategorias() {
+            axios.get(`${baseURL}/categories`)
+                .then(response => {
+                    const categorias = response.data;
+                    let html = '<table class="table table-striped">';
+                    html += '<thead><tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Ações</th></tr></thead><tbody>';
+                    categorias.forEach(categoria => {
+                        html += `<tr>
+                          <td>${categoria.id}</td>
+                          <td>${categoria.name}</td>
+                          <td>${categoria.description}</td>
+                          <td>
+                              <button class="btn btn-warning btn-sm" onclick="editarCategoria(${categoria.id})">Editar</button>
+                              <button class="btn btn-danger btn-sm" onclick="deletarCategoria(${categoria.id})">Excluir</button>
+                          </td>
+                      </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    document.getElementById('categorias-lista').innerHTML = html;
+                })
+                .catch(error => console.error('Erro ao listar categorias:', error));
+        }
+
+        function adicionarOuAtualizarCategoria() {
+            const id = document.getElementById('categoria-id').value;
+            const nome = document.getElementById('categoria-nome').value;
+            const descricao = document.getElementById('categoria-descricao').value;
+
+            const categoria = {
+                name: nome,
+                description: descricao
+            };
+
+            if (id) {
+                axios.put(`${baseURL}/categories/${id}`, categoria)
+                    .then(() => {
+                        alert('Categoria atualizada com sucesso!');
+                        listarCategorias();
+                        bootstrap.Modal.getInstance(document.getElementById('categoriaModal')).hide();
+                    })
+                    .catch(error => console.error('Erro ao atualizar categoria:', error));
+            } else {
+                axios.post(`${baseURL}/categories`, categoria)
+                    .then(() => {
+                        alert('Categoria adicionada com sucesso!');
+                        listarCategorias();
+                        bootstrap.Modal.getInstance(document.getElementById('categoriaModal')).hide();
+                    })
+                    .catch(error => console.error('Erro ao adicionar categoria:', error));
+            }
+        }
+
+        function editarCategoria(id) {
+            axios.get(`${baseURL}/categories/${id}`)
+                .then(response => {
+                    const categoria = response.data;
+                    document.getElementById('categoria-id').value = categoria.id;
+                    document.getElementById('categoria-nome').value = categoria.name;
+                    document.getElementById('categoria-descricao').value = categoria.description;
+                    const modal = new bootstrap.Modal(document.getElementById('categoriaModal'));
+                    modal.show();
+                })
+                .catch(error => console.error('Erro ao carregar categoria para edição:', error));
+        }
+
+        function deletarCategoria(id) {
+            if (confirm('Deseja realmente excluir esta categoria?')) {
+                axios.delete(`${baseURL}/categories/${id}`)
+                    .then(() => {
+                        alert('Categoria excluída com sucesso!');
+                        listarCategorias();
+                    })
+                    .catch(error => console.error('Erro ao excluir categoria:', error));
+            }
+        }
+
+
+
+
+
+
+
+        // -------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+        // Função para abrir o modal de cliente com opções de escolher endereço existente ou adicionar novo
+        // Função para exibir a tabela de endereços existentes
+        // Função para exibir a tabela de endereços existentesconst baseURL = 'http://localhost:8081/api';
+
+        // Função para listar clientes com endereços
+
+        // Função para listar clientes com endereços
+
+        // Função para listar clientes com endereços
+        function listarClientes() {
+            axios.get(`${baseURL}/customers`)
+                .then(response => {
+                    const clientes = response.data;
+                    let html = '<table class="table table-striped">';
+                    html += '<thead><tr><th>ID</th><th>Nome</th><th>CPF</th><th>Endereços</th><th>Ações</th></tr></thead><tbody>';
+                    clientes.forEach(cliente => {
+                        html += `<tr>
+                    <td>${cliente.id}</td>
+                    <td>${cliente.name}</td>
+                    <td>${cliente.cpf}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="mostrarEnderecos(${cliente.id})">Ver Endereços</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editarCliente(${cliente.id})">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deletarCliente(${cliente.id})">Excluir</button>
+                    </td>
+                </tr>`;
+
+                        // Adiciona os endereços do cliente
+                        html += `<tr id="enderecos-${cliente.id}" style="display: none;">
+                    <td colspan="5">
+                        <table class="table table-bordered">
+                            <thead><tr><th>CEP</th><th>Rua</th><th>Número</th><th>Bairro</th><th>Cidade</th><th>Estado</th><th>Ações</th></tr></thead>
+                            <tbody>`;
+
+                        if (cliente.addresses && cliente.addresses.length > 0) {
+                            cliente.addresses.forEach(endereco => {
+                                html += `<tr id="endereco-${endereco.id}">
+                            <td>${endereco.cep}</td>
+                            <td>${endereco.rua}</td>
+                            <td>${endereco.numero}</td>
+                            <td>${endereco.bairro}</td>
+                            <td>${endereco.cidade}</td>
+                            <td>${endereco.estado}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editarEndereco(${cliente.id}, ${endereco.id})">Editar</button>
+                                <button class="btn btn-danger btn-sm" onclick="deletarEndereco(${cliente.id}, ${endereco.id})">Deletar</button>
+                            </td>
+                        </tr>`;
+                            });
+                        } else {
+                            html += `<tr><td colspan="7">Nenhum endereço disponível</td></tr>`;
+                        }
+
+                        html += `</tbody></table>
+                        <button class="btn btn-success btn-sm" onclick="adicionarNovoEnderecoAoCliente(${cliente.id})">Adicionar Endereço</button>
+                    </td></tr>`;
+                    });
+                    html += '</tbody></table>';
+                    document.getElementById('clientes-lista').innerHTML = html;
+                })
+                .catch(error => console.error('Erro ao listar clientes:', error));
+        }
+
+        // Função para mostrar ou ocultar os endereços de um cliente
+        function mostrarEnderecos(clienteId) {
+            const enderecoRow = document.getElementById(`enderecos-${clienteId}`);
+            if (enderecoRow.style.display === 'none') {
+                enderecoRow.style.display = '';
+            } else {
+                enderecoRow.style.display = 'none';
+            }
+        }
+
+        // Função para exibir a tabela de endereços existentes
+       // Função para exibir a tabela de endereços existentes e aumentar a largura do modal
+
+       function editarCliente(id) {
+    axios.get(`${baseURL}/customers/${id}`)
+        .then(response => {
+            const cliente = response.data;
+            document.getElementById('cliente-id').value = cliente.id;
+            document.getElementById('cliente-nome').value = cliente.name;
+            document.getElementById('cliente-cpf').value = cliente.cpf;
+
+            // Opcional: se você quiser carregar os endereços do cliente para edição
+            // Você pode implementar isso aqui
+
+            const modal = new bootstrap.Modal(document.getElementById('clienteModal'));
+            modal.show();
+        })
+        .catch(error => console.error('Erro ao carregar cliente para edição:', error));
+}
+
+function deletarCliente(id) {
+    if (confirm('Deseja realmente excluir este cliente?')) {
+        axios.delete(`${baseURL}/customers/${id}`)
+            .then(() => {
+                alert('Cliente excluído com sucesso!');
+                listarClientes();
+            })
+            .catch(error => console.error('Erro ao excluir cliente:', error));
+    }
+}
+
+
+
+
+function escolherEnderecoExistente() {
+    axios.get(`${baseURL}/addresses`)
+        .then(response => {
+            const enderecos = response.data;
+            let html = '<table class="table table-striped">';
+            html += '<thead><tr><th>Selecionar</th><th>CEP</th><th>Rua</th><th>Número</th><th>Bairro</th><th>Cidade</th><th>Estado</th></tr></thead><tbody>';
+            enderecos.forEach(endereco => {
+                html += `<tr>
+                    <td><input type="radio" name="endereco-selecionado" value="${endereco.id}" data-endereco='${JSON.stringify(endereco)}'></td>
+                    <td>${endereco.cep}</td>
+                    <td>${endereco.rua}</td>
+                    <td>${endereco.numero}</td>
+                    <td>${endereco.bairro}</td>
+                    <td>${endereco.cidade}</td>
+                    <td>${endereco.estado}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('enderecos-lista').innerHTML = html;
+            document.getElementById('endereco-existente').style.display = ''; // Mostra a tabela de endereços existentes
+
+            // Aumenta a largura do modal ao exibir os endereços
+            document.querySelector('#clienteModal .modal-dialog').classList.add('modal-xl'); // Aplica modal extra large
+        })
+        .catch(error => console.error('Erro ao listar endereços:', error));
+}
+
+// Função para exibir o formulário de novo endereço e retornar o modal ao tamanho normal
+function adicionarNovoEndereco() {
+    document.getElementById('novo-endereco').style.display = ''; // Mostra o formulário de novo endereço
+    document.getElementById('endereco-existente').style.display = 'none'; // Esconde a tabela de endereços
+
+    // Volta o modal para o tamanho padrão
+    document.querySelector('#clienteModal .modal-dialog').classList.remove('modal-xl');
+}
+
+
+// Função para resetar o modal e voltar ao estado inicial
+function resetarModalCliente() {
+    // Esconde as seções de endereços
+    document.getElementById('novo-endereco').style.display = 'none';
+    document.getElementById('endereco-existente').style.display = 'none';
+
+    // Remove o tamanho extra grande do modal
+    document.querySelector('#clienteModal .modal-dialog').classList.remove('modal-xl');
+
+    // Limpa os campos de texto
+    document.getElementById('cliente-nome').value = '';
+    document.getElementById('cliente-cpf').value = '';
+
+    // Limpa os campos de endereço
+    document.getElementById('endereco-cep').value = '';
+    document.getElementById('endereco-rua').value = '';
+    document.getElementById('endereco-numero').value = '';
+    document.getElementById('endereco-bairro').value = '';
+    document.getElementById('endereco-complemento').value = '';
+    document.getElementById('endereco-cidade').value = '';
+    document.getElementById('endereco-estado').value = '';
+}
+
+document.getElementById('clienteModal').addEventListener('hidden.bs.modal', function () {
+    resetarModalCliente();
+});
+
+
+
+
+
+        // Função para adicionar ou atualizar cliente com a opção de endereço existente ou novo
+        function adicionarOuAtualizarClienteComEndereco() {
+            const nome = document.getElementById('cliente-nome').value;
+            const cpf = document.getElementById('cliente-cpf').value;
+
+            const cliente = {
+                name: nome,
+                cpf: cpf
+            };
+
+            // Cria o cliente
+            axios.post(`${baseURL}/customers`, cliente)
+                .then(response => {
+                    const clienteCriado = response.data;
+                    associarEnderecoCliente(clienteCriado.id); // Associa o endereço ao cliente criado
+                })
+                .catch(error => console.error('Erro ao adicionar cliente:', error));
+        }
+
+        // Função para associar o endereço ao cliente criado
+        function associarEnderecoCliente(clienteId) {
+            const enderecoSelecionado = document.querySelector('input[name="endereco-selecionado"]:checked');
+
+            if (enderecoSelecionado) {
+                // Pega os dados do endereço selecionado
+                const endereco = JSON.parse(enderecoSelecionado.getAttribute('data-endereco'));
+                // Faz o POST para associar o endereço com o clienteId
+                axios.post(`${baseURL}/addresses?customerId=${clienteId}`, {
+                    cep: endereco.cep,
+                    rua: endereco.rua,
+                    numero: endereco.numero,
+                    bairro: endereco.bairro,
+                    complemento: endereco.complemento,
+                    cidade: endereco.cidade,
+                    estado: endereco.estado
+                })
+                    .then(() => {
+                        alert('Cliente e endereço associado com sucesso!');
+                        listarClientes();
+                        bootstrap.Modal.getInstance(document.getElementById('clienteModal')).hide();
+                    })
+                    .catch(error => console.error('Erro ao associar endereço ao cliente:', error));
+            } else {
+                // Adiciona novo endereço com o customerId
+                const cep = document.getElementById('endereco-cep').value;
+                const rua = document.getElementById('endereco-rua').value;
+                const numero = document.getElementById('endereco-numero').value;
+                const bairro = document.getElementById('endereco-bairro').value;
+                const complemento = document.getElementById('endereco-complemento').value;
+                const cidade = document.getElementById('endereco-cidade').value;
+                const estado = document.getElementById('endereco-estado').value;
+
+                const novoEndereco = {
+                    cep: cep,
+                    rua: rua,
+                    numero: numero,
+                    bairro: bairro,
+                    complemento: complemento,
+                    cidade: cidade,
+                    estado: estado
+                };
+
+                axios.post(`${baseURL}/addresses?customerId=${clienteId}`, novoEndereco)
+                    .then(() => {
+                        alert('Cliente e novo endereço adicionados com sucesso!');
+                        listarClientes();
+                        bootstrap.Modal.getInstance(document.getElementById('clienteModal')).hide();
+                    })
+                    .catch(error => console.error('Erro ao adicionar novo endereço:', error));
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Função para editar um endereço
+        function editarEndereco(clienteId) {
+            // Remover modal existente, caso já tenha sido criado antes
+            const existingModal = document.getElementById('editAddressModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            // Buscar o cliente e seus endereços
+            axios.get(`http://localhost:8081/api/customers/${clienteId}`)
+                .then(response => {
+                    const cliente = response.data;
+                    const enderecos = cliente.addresses;
+
+                    if (enderecos.length > 0) {
+                        // Criar o modal dinamicamente com um select para escolher o endereço
+                        let enderecoOptions = '';
+                        enderecos.forEach(endereco => {
+                            enderecoOptions += `
+                        <option value="${endereco.id}">${endereco.rua}, ${endereco.numero} - ${endereco.cidade}, ${endereco.estado}</option>
+                    `;
+                        });
+
+                        const modalHTML = `
+                <div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="editAddressLabel">Editar Endereço</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form id="editAddressForm">
+                          <label for="enderecoSelect" class="form-label">Selecione o Endereço</label>
+                          <select class="form-select mb-3" id="enderecoSelect">${enderecoOptions}</select>
+                          <div class="mb-3">
+                            <label for="cep" class="form-label">CEP</label>
+                            <input type="text" class="form-control" id="cep" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="rua" class="form-label">Rua</label>
+                            <input type="text" class="form-control" id="rua" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="numero" class="form-label">Número</label>
+                            <input type="text" class="form-control" id="numero" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="bairro" class="form-label">Bairro</label>
+                            <input type="text" class="form-control" id="bairro" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="complemento" class="form-label">Complemento</label>
+                            <input type="text" class="form-control" id="complemento">
+                          </div>
+                          <div class="mb-3">
+                            <label for="cidade" class="form-label">Cidade</label>
+                            <input type="text" class="form-control" id="cidade" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="estado" class="form-label">Estado</label>
+                            <input type="text" class="form-control" id="estado" required>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="saveAddressButton">Salvar Alterações</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+
+                        // Adicionar o modal ao body
+                        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                        // Inicializar o modal do Bootstrap
+                        const editAddressModal = new bootstrap.Modal(document.getElementById('editAddressModal'));
+                        editAddressModal.show();
+
+                        // Função para preencher os campos do endereço no modal
+                        function preencherCamposEndereco(endereco) {
+                            document.getElementById('cep').value = endereco.cep;
+                            document.getElementById('rua').value = endereco.rua;
+                            document.getElementById('numero').value = endereco.numero;
+                            document.getElementById('bairro').value = endereco.bairro;
+                            document.getElementById('complemento').value = endereco.complemento;
+                            document.getElementById('cidade').value = endereco.cidade;
+                            document.getElementById('estado').value = endereco.estado;
+                        }
+
+                        // Preencher os campos com o primeiro endereço por padrão
+                        preencherCamposEndereco(enderecos[0]);
+
+                        // Atualizar os campos do modal com os dados do endereço selecionado
+                        document.getElementById('enderecoSelect').addEventListener('change', function () {
+                            const selectedEndereco = enderecos.find(e => e.id == this.value);
+                            preencherCamposEndereco(selectedEndereco);
+                        });
+
+                        // Ação ao clicar em "Salvar Alterações"
+                        document.getElementById('saveAddressButton').addEventListener('click', function () {
+                            const enderecoId = document.getElementById('enderecoSelect').value;
+                            const cep = document.getElementById('cep').value;
+                            const rua = document.getElementById('rua').value;
+                            const numero = document.getElementById('numero').value;
+                            const bairro = document.getElementById('bairro').value;
+                            const complemento = document.getElementById('complemento').value;
+                            const cidade = document.getElementById('cidade').value;
+                            const estado = document.getElementById('estado').value;
+
+                            // Validar se todos os campos obrigatórios estão preenchidos
+                            if (!cep || !rua || !numero || !bairro || !cidade || !estado) {
+                                alert('Por favor, preencha todos os campos obrigatórios.');
+                                return;
+                            }
+
+                            // Criar objeto com os dados atualizados para o novo endereço
+                            const novoEndereco = {
+                                cep,
+                                rua,
+                                numero,
+                                bairro,
+                                complemento,
+                                cidade,
+                                estado
+                            };
+
+                            // 1. Deletar o endereço selecionado
+                            axios.delete(`http://localhost:8081/api/addresses/${enderecoId}`)
+                                .then(() => {
+                                    // 2. Adicionar o novo endereço
+                                    axios.post(`http://localhost:8081/api/addresses?customerId=${clienteId}`, novoEndereco, {
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        }
+                                    })
+                                        .then(() => {
+                                            alert('Endereço atualizado com sucesso!');
+                                            listarClientes(); // Função para atualizar a lista de clientes/endereço
+                                            editAddressModal.hide(); // Fechar o modal
+                                        })
+                                        .catch(error => console.error('Erro ao adicionar novo endereço:', error));
+                                })
+                                .catch(error => console.error('Erro ao deletar o endereço:', error));
+                        });
+
+                        // Remover o modal da DOM ao fechá-lo
+                        document.getElementById('editAddressModal').addEventListener('hidden.bs.modal', function () {
+                            const modalElement = document.getElementById('editAddressModal');
+                            if (modalElement) {
+                                modalElement.remove();
+                            }
+                        });
+                    } else {
+                        alert('Este cliente não possui endereços cadastrados.');
+                    }
+                })
+                .catch(error => console.error('Erro ao buscar cliente:', error));
+        }
+
+
+
+
+
+
+
+
+
+        // Função para deletar um endereço
+        function deletarEndereco(clienteId, enderecoId) {
+            if (confirm('Deseja realmente excluir este endereço?')) {
+                axios.delete(`${baseURL}/addresses/${enderecoId}`)
+                    .then(() => {
+                        alert('Endereço excluído com sucesso!');
+                        listarClientes();
+                    })
+                    .catch(error => console.error('Erro ao excluir endereço:', error));
+            }
+        }
+
+
+
+
+
+
+        // Função para adicionar um novo endereço ao cliente
+        function adicionarNovoEnderecoAoCliente(clienteId) {
+            // Remover modal existente, caso já tenha sido criado antes
+            const existingModal = document.getElementById('addAddressModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            // Criar o modal dinamicamente
+            const modalHTML = `
+    <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addAddressLabel">Adicionar Novo Endereço</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="addAddressForm">
+              <div class="mb-3">
+                <label for="cep" class="form-label">CEP</label>
+                <input type="text" class="form-control" id="cep" required>
+              </div>
+              <div class="mb-3">
+                <label for="rua" class="form-label">Rua</label>
+                <input type="text" class="form-control" id="rua" required>
+              </div>
+              <div class="mb-3">
+                <label for="numero" class="form-label">Número</label>
+                <input type="text" class="form-control" id="numero" required>
+              </div>
+              <div class="mb-3">
+                <label for="bairro" class="form-label">Bairro</label>
+                <input type="text" class="form-control" id="bairro" required>
+              </div>
+              <div class="mb-3">
+                <label for="complemento" class="form-label">Complemento</label>
+                <input type="text" class="form-control" id="complemento">
+              </div>
+              <div class="mb-3">
+                <label for="cidade" class="form-label">Cidade</label>
+                <input type="text" class="form-control" id="cidade" required>
+              </div>
+              <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <input type="text" class="form-control" id="estado" required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="saveNewAddressButton">Adicionar Endereço</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+            // Adicionar o modal ao body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+            // Inicializar o modal do Bootstrap
+            const addAddressModal = new bootstrap.Modal(document.getElementById('addAddressModal'));
+            addAddressModal.show();
+
+            // Ação ao clicar em "Adicionar Endereço"
+            document.getElementById('saveNewAddressButton').addEventListener('click', function () {
+                const cep = document.getElementById('cep').value;
+                const rua = document.getElementById('rua').value;
+                const numero = document.getElementById('numero').value;
+                const bairro = document.getElementById('bairro').value;
+                const complemento = document.getElementById('complemento').value;
+                const cidade = document.getElementById('cidade').value;
+                const estado = document.getElementById('estado').value;
+
+                // Validar se todos os campos obrigatórios estão preenchidos
+                if (!cep || !rua || !numero || !bairro || !cidade || !estado) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+
+                // Criar objeto com os dados do novo endereço
+                const novoEndereco = {
+                    cep,
+                    rua,
+                    numero,
+                    bairro,
+                    complemento,
+                    cidade,
+                    estado,
+                    customerId: clienteId
+                };
+
+                // Fazer a chamada POST para adicionar o novo endereço
+                axios.post(`${baseURL}/addresses?customerId=${clienteId}`, novoEndereco, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                    })
+                    .then(() => {
+                        alert('Novo endereço adicionado com sucesso!');
+                        listarClientes(); // Função para atualizar a lista de clientes
+                        addAddressModal.hide(); // Fechar o modal
+                    })
+                    .catch(error => console.error('Erro ao adicionar novo endereço:', error));
+            });
+
+            // Remover o modal da DOM ao fechá-lo
+            document.getElementById('addAddressModal').addEventListener('hidden.bs.modal', function () {
+                const modalElement = document.getElementById('addAddressModal');
+                if (modalElement) {
+                    modalElement.remove();
+                }
+            });
+        }
+
+
+
+
+
+
+        function listarEnderecos() {
+    axios.get(`${baseURL}/addresses`)
+        .then(response => {
+            const enderecos = response.data;
+            let html = '<table class="table table-striped">';
+            html += '<thead><tr><th>ID</th><th>CEP</th><th>Rua</th><th>Número</th><th>Bairro</th><th>Cidade</th><th>Estado</th><th>Ações</th></tr></thead><tbody>';
+            
+            enderecos.forEach(endereco => {
+                html += `<tr>
+                    <td>${endereco.id}</td>
+                    <td>${endereco.cep}</td>
+                    <td>${endereco.rua}</td>
+                    <td>${endereco.numero}</td>
+                    <td>${endereco.bairro}</td>
+                    <td>${endereco.cidade}</td>
+                    <td>${endereco.estado}</td>
+                  <td style="white-space: nowrap;">
+    <button class="btn btn-warning btn-sm d-inline-block me-1" style="width: 70px;" onclick="editarEndereco(${endereco.id})">Editar</button>
+    <button class="btn btn-danger btn-sm d-inline-block" style="width: 70px;" onclick="deletarEndereco(${endereco.id})">Excluir</button>
+</td>
+
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('enderecos-lista-principal').innerHTML = html;
+        })
+        .catch(error => console.error('Erro ao listar endereços:', error));
+}
+
+
+function editarEndereco(enderecoId) {
+    // Remover modal existente, caso já tenha sido criado antes
+    const existingModal = document.getElementById('editAddressModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Buscar o endereço com o ID fornecido
+    axios.get(`${baseURL}/addresses/${enderecoId}`)
+        .then(response => {
+            const endereco = response.data;
+
+            // Criar o modal dinamicamente
+            const modalHTML = `
+            <div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="editAddressLabel">Editar Endereço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <form id="editAddressForm">
+                      <div class="mb-3">
+                        <label for="cep" class="form-label">CEP</label>
+                        <input type="text" class="form-control" id="cep" value="${endereco.cep}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="rua" class="form-label">Rua</label>
+                        <input type="text" class="form-control" id="rua" value="${endereco.rua}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="numero" class="form-label">Número</label>
+                        <input type="text" class="form-control" id="numero" value="${endereco.numero}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="bairro" class="form-label">Bairro</label>
+                        <input type="text" class="form-control" id="bairro" value="${endereco.bairro}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="complemento" class="form-label">Complemento</label>
+                        <input type="text" class="form-control" id="complemento" value="${endereco.complemento}">
+                      </div>
+                      <div class="mb-3">
+                        <label for="cidade" class="form-label">Cidade</label>
+                        <input type="text" class="form-control" id="cidade" value="${endereco.cidade}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <input type="text" class="form-control" id="estado" value="${endereco.estado}" required>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveAddressButton">Salvar Alterações</button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+
+            // Adicionar o modal ao body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+            // Inicializar o modal do Bootstrap
+            const editAddressModal = new bootstrap.Modal(document.getElementById('editAddressModal'));
+            editAddressModal.show();
+
+            // Ação ao clicar em "Salvar Alterações"
+            document.getElementById('saveAddressButton').addEventListener('click', function () {
+                const cep = document.getElementById('cep').value;
+                const rua = document.getElementById('rua').value;
+                const numero = document.getElementById('numero').value;
+                const bairro = document.getElementById('bairro').value;
+                const complemento = document.getElementById('complemento').value;
+                const cidade = document.getElementById('cidade').value;
+                const estado = document.getElementById('estado').value;
+
+                const enderecoAtualizado = {
+                    cep,
+                    rua,
+                    numero,
+                    bairro,
+                    complemento,
+                    cidade,
+                    estado
+                };
+
+                // Atualizar o endereço
+                axios.put(`${baseURL}/addresses/${enderecoId}`, enderecoAtualizado, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(() => {
+                    alert('Endereço atualizado com sucesso!');
+                    listarEnderecos(); // Atualizar a tabela de endereços
+                    editAddressModal.hide(); // Fechar o modal
+                })
+                .catch(error => console.error('Erro ao atualizar endereço:', error));
+            });
+
+            // Remover o modal da DOM ao fechá-lo
+            document.getElementById('editAddressModal').addEventListener('hidden.bs.modal', function () {
+                const modalElement = document.getElementById('editAddressModal');
+                if (modalElement) {
+                    modalElement.remove();
+                }
+            });
+        })
+        .catch(error => console.error('Erro ao buscar endereço:', error));
+}
+
+
+
+function deletarEndereco(enderecoId) {
+    if (confirm('Deseja realmente excluir este endereço?')) {
+        axios.delete(`${baseURL}/addresses/${enderecoId}`)
+            .then(() => {
+                alert('Endereço excluído com sucesso!');
+                listarEnderecos(); // Atualizar a tabela de endereços
+            })
+            .catch(error => console.error('Erro ao excluir endereço:', error));
+    }
+}
+
+
+
+
+
+// Função para carregar as buscas ao carregar a página
+
+// Função principal que é chamada ao carregar a página
+window.onload = function() {
+    carregarCategorias().then(() => listarProdutos());
+    carregarCategoriasNoProduto();
+    listarCategorias();
+    listarClientes();
+    listarEnderecos();
+
+    // Adicionar campos de busca para cada tabela
+    adicionarCampoBusca('produtos-lista', 'Buscar produtos (Nome, ID, Categoria)', buscarProdutos);
+    adicionarCampoBusca('categorias-lista', 'Buscar categorias (Nome, ID)', buscarCategorias);
+    adicionarCampoBusca('clientes-lista', 'Buscar clientes (ID, Nome, CPF)', buscarClientes);
+    adicionarCampoBusca('enderecos-lista-principal', 'Buscar endereços (CEP, Rua, Estado, Cidade)', buscarEnderecos);
+};
+
+// Função para adicionar um único campo de busca em cada seção
+function adicionarCampoBusca(listaId, placeholder, funcaoBusca) {
+    const buscaDiv = document.createElement('div');
+    buscaDiv.classList.add('mb-3'); // Classe de espaçamento
+    buscaDiv.innerHTML = `
+        <input type="text" placeholder="${placeholder}" class="form-control" onkeyup="${funcaoBusca.name}()">
+    `;
+    const lista = document.getElementById(listaId);
+    lista.parentNode.insertBefore(buscaDiv, lista);
+}
+
+// Função de busca para Produtos (Nome, ID, Categoria)
+function buscarProdutos() {
+    const buscaValor = document.querySelector('#produtos-lista').previousElementSibling.querySelector('input').value.toLowerCase();
+    const rows = document.querySelectorAll('#produtos-lista table tbody tr');
+    
+    rows.forEach(row => {
+        const nomeProduto = row.children[1].textContent.toLowerCase();
+        const idProduto = row.children[0].textContent;
+        const categoriaProduto = row.children[4].textContent.toLowerCase();
+        
+        if (nomeProduto.includes(buscaValor) || idProduto.includes(buscaValor) || categoriaProduto.includes(buscaValor)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Função de busca para Categorias (Nome, ID)
+function buscarCategorias() {
+    const buscaValor = document.querySelector('#categorias-lista').previousElementSibling.querySelector('input').value.toLowerCase();
+    const rows = document.querySelectorAll('#categorias-lista table tbody tr');
+
+    rows.forEach(row => {
+        const nomeCategoria = row.children[1].textContent.toLowerCase();
+        const idCategoria = row.children[0].textContent;
+
+        if (nomeCategoria.includes(buscaValor) || idCategoria.includes(buscaValor)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Função de busca para Clientes (ID, Nome, CPF) - Apenas as linhas principais com Ver Endereços
+function buscarClientes() {
+    const buscaValor = document.querySelector('#clientes-lista').previousElementSibling.querySelector('input').value.toLowerCase();
+    const rows = document.querySelectorAll('#clientes-lista table tbody tr');
+
+    rows.forEach(row => {
+        // Verifica se a linha tem o botão "Ver Endereços", pois as linhas principais possuem esse botão
+        const hasEnderecoButton = row.querySelector('button') && row.querySelector('button').textContent.includes('Ver Endereços');
+        
+        if (hasEnderecoButton) {
+            const idCliente = row.children[0].textContent.toLowerCase(); // ID do cliente
+            const nomeCliente = row.children[1].textContent.toLowerCase(); // Nome do cliente
+            const cpfCliente = row.children[2].textContent.toLowerCase(); // CPF do cliente
+
+            // Filtra por ID, Nome ou CPF
+            if (idCliente.includes(buscaValor) || nomeCliente.includes(buscaValor) || cpfCliente.includes(buscaValor)) {
+                row.style.display = ''; // Mostra a linha se corresponder a algum critério
+            } else {
+                row.style.display = 'none'; // Esconde a linha se não corresponder
+            }
+        }
+    });
+}
+
+// Função de busca para Endereços (CEP, Rua, Estado, Cidade)
+function buscarEnderecos() {
+    const buscaValor = document.querySelector('#enderecos-lista-principal').previousElementSibling.querySelector('input').value.toLowerCase();
+    const rows = document.querySelectorAll('#enderecos-lista-principal table tbody tr');
+
+    rows.forEach(row => {
+        const cepEndereco = row.children[1].textContent.toLowerCase();
+        const ruaEndereco = row.children[2].textContent.toLowerCase();
+        const estadoEndereco = row.children[5].textContent.toLowerCase();
+        const cidadeEndereco = row.children[4].textContent.toLowerCase();
+
+        if (cepEndereco.includes(buscaValor) || ruaEndereco.includes(buscaValor) || estadoEndereco.includes(buscaValor) || cidadeEndereco.includes(buscaValor)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Adiciona evento de clique para rolar suavemente até a seção correspondente
+// Adiciona evento de clique para rolar suavemente até a seção correspondente
+// Adiciona evento de clique para rolar suavemente até a seção correspondente
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link'); // Seletor atualizado
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (event) {
+            event.preventDefault(); // Previne o comportamento padrão do link
+
+            // Obtém o ID da seção alvo
+            const targetId = this.getAttribute('href'); // O href deve ser um ID de seção
+            const targetSection = document.querySelector(targetId);
+
+            // Se a seção alvo for encontrada, calcula a posição com o deslocamento
+            if (targetSection) {
+                const offset = 95; // Valor do deslocamento para mover mais para baixo (ajuste conforme necessário)
+                const targetPosition = targetSection.getBoundingClientRect().top + window.pageYOffset - offset;
+
+                // Rola para a posição calculada
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth' // Rola suavemente para a posição
+                });
+            }
+        });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+# ----------------------- Produtos -----------------------
+GET http://localhost:8081/api/products/4
+
+### GET - Listar todos os produtos
+GET http://localhost:8081/api/products
+
+### GET - Consultar um produto por ID
+GET http://localhost:8081/api/products/5
+
+
+### GET - Listar todos os produtos de uma categoria
+GET http://localhost:8081/api/products?categoryId=1
+
+### POST - Adicionar um produto
+POST http://localhost:8081/api/products
+Content-Type: application/json
+
+{
+    "name": "Produto Teste",
+    "description": "Descrição do Produto Teste",
+    "price": 100.00,
+    "category": {
+        "id": 2
+    }
+}
+
+### PUT - Atualizar um produto
+PUT http://localhost:8081/api/products/5
+Content-Type: application/json
+
+{
+    "name": "Produto Atualizado",
+    "description": "Descrição Atualizada",
+    "price": 140.00,
+    "category": {
+        "id": 2
+    }
+}
+
+### DELETE - Excluir um produto
+DELETE http://localhost:8081/api/products/1
+

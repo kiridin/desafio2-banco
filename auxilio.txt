@@ -1,0 +1,69 @@
+Pizza
+    id
+    nome
+    modelos [tamanho e valor]
+    ingredientes [Ingrediente]  
+    observacao
+    tipo ETipo (SALGADA OU DOCE, AGRI_DOCE)
+    ativa: true ou false
+
+Ingrediente OK
+    id
+    nome
+    dataValidade
+    observacao
+
+1° Modelos OK
+2° Repository OK ?
+3° Service OK ?
+4° Controller OK
+
+=====================
+Tabelas: 
+Ingrediente
+Pizza
+Modelo
+
+CRUD
+
+C OK
+R OK
+U OK
+D
+
+Pronto
+CRUD de ingredientes
+CRUD de Modelo de Pizza
+
+Relacionamentos ou cardinalidades.
+
+OneToOne => 1 : 1
+OneToMany => 1 : *  
+ManyToOne => * : 1 
+ManyToMany => * : * 
+
+pizzas e modelos
+pizzas_modelos
+
+id_pizza e id_modelo
+1              1
+1              2
+2              1
+2              2
+
+
+pizza >> modelo | >> pizza >> modelo >> 
+
+Alguns pontos para estudarem ainda sobre API
+
+Para o desafio estudar:
+OneToOne => 1 : 1
+OneToMany => 1 : *  
+ManyToOne => * : 1 
+ManyToMany => * : * 
+
+Para a vida, estudar: 
+1° DTO (Data Transfer Object)
+2° Autenticação (JWT)  401 
+3° Autorização ou permissao 403
+4° Queries personalizadas 
